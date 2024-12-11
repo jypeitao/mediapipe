@@ -96,6 +96,7 @@ for app in ${apps}; do
           if [[ ${category} != "shoe" ]]; then
             bazel_flags_extended+=(--define ${category}=true)
           fi
+          echo "all flags1: ${bazel_flags[@]}"
           bazelisk "${bazel_flags_extended[@]}"
           cp -f "${bin}" "${apk}"
         fi
@@ -104,6 +105,7 @@ for app in ${apps}; do
     else
       apk="${out_dir}/${target_name}.apk"
       if [[ $install_only == false ]]; then
+        echo "all flags2: ${bazel_flags[@]}"
         bazelisk "${bazel_flags[@]}"
         cp -f "${bin}" "${apk}"
       fi
@@ -116,9 +118,9 @@ echo
 echo "Connect your device via adb to install the apps."
 read -p "Press 'a' to abort, or press any other key to continue ..." -n 1 -r
 echo
-if [[ ! $REPLY =~ ^[Aa]$ ]]; then
-  for apk in "${apks[@]}"; do
-    echo "=== Installing $apk"
-    adb install -r "${apk}"
-  done
-fi
+# if [[ ! $REPLY =~ ^[Aa]$ ]]; then
+#   for apk in "${apks[@]}"; do
+#     echo "=== Installing $apk"
+#     adb install -r "${apk}"
+#   done
+# fi
