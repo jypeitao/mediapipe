@@ -148,7 +148,12 @@ absl::Status RunMPPGraph() {
   return graph.WaitUntilDone();
 }
 
+#include <filesystem>
 int main(int argc, char** argv) {
+  std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
+  const auto targetPwd =  std::filesystem::path("/home/peter/wk2/os/xr/mediapipe");
+  std::filesystem::current_path(targetPwd);
+  std::cout << "Current working directory after changed: " << std::filesystem::current_path() << std::endl;
   google::InitGoogleLogging(argv[0]);
   absl::ParseCommandLine(argc, argv);
   absl::Status run_status = RunMPPGraph();
