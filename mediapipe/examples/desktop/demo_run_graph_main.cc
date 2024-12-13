@@ -28,6 +28,7 @@
 #include "mediapipe/framework/port/parse_text_proto.h"
 #include "mediapipe/framework/port/status.h"
 #include "mediapipe/util/resource_util.h"
+#include "mediapipe/util/pose_util.h"
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
@@ -81,6 +82,9 @@ absl::Status RunMPPGraph() {
   ABSL_LOG(INFO) << "Start running the calculator graph.";
   MP_ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
                       graph.AddOutputStreamPoller(kOutputStream));
+
+  MP_ASSIGN_OR_RETURN(auto landmarksPoller,
+                    graph.AddOutputStreamPoller("landmarks"));
   MP_RETURN_IF_ERROR(graph.StartRun({}));
 
   ABSL_LOG(INFO) << "Start grabbing and processing frames.";
@@ -140,6 +144,19 @@ absl::Status RunMPPGraph() {
       const int pressed_key = cv::waitKey(5);
       if (pressed_key >= 0 && pressed_key != 255) grab_frames = false;
     }
+
+    mediapipe::Packet landmarks_packet;
+    if (landmarksPoller.Next(&landmarks_packet)) {
+      const auto& landmark_list = landmarks_packet.Get<mediapipe::NormalizedLandmarkList>();
+      for (int i = 0; i < landmark_list.landmark_size(); ++i) {
+        const auto& landmark = landmark_list.landmark(i);
+        std::cout << "Landmark " << i
+                  << ": (x=" << landmark.x()
+                  << ", y=" << landmark.y()
+                  << ", z=" << landmark.z() << ")" << std::endl;
+      }
+    }
+
   }
 
   ABSL_LOG(INFO) << "Shutting down.";
